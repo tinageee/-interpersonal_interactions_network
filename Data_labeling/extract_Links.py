@@ -23,11 +23,11 @@ import re
 
 label_prefix_list= ['AG', 'DAG', 'TT', 'DTT', 'NM', 'SPY', 'CH', 'DF']
 # Get the current working directory
-parent_dir = os.path.dirname(os.getcwd())
+code_dir='/Users/saiyingge/Coding Projects/PyCharmProjects/NetworkProject/'
 
 # Construct the full path to the file
-game_name_file_path = os.path.join(parent_dir, 'Data/game_names.csv')
-Reviewed_files = os.path.join(parent_dir, 'Data/Private_Data/Reviewed/')
+game_name_file_path = os.path.join(code_dir, 'Data/game_names.csv')
+Reviewed_files = os.path.join(code_dir, 'Data/Private_Data/Reviewed/')
 
 # Get all game names
 game_names = []
