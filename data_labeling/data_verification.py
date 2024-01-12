@@ -43,7 +43,7 @@ directory_Coder1 = '/Users/saiyingge/**Research Projects/Nomination-network/data
 directory_Coder2 = '/Users/saiyingge/**Research Projects/Nomination-network/data/Tags_two_coders/KG_tags'
 
 # save directory
-directory_save = '/Users/saiyingge/Coding Projects/PyCharmProjects/NetworkProject/Data/'
+directory_save = '/Users/saiyingge/Coding Projects/PyCharmProjects/NetworkProject/Data/Private_Data'
 
 # the file need to restructure
 file_restructure = ['003USP', '003ZAM', '007ISR', '010HK','003ISR', '008USP', '013HK']
@@ -252,7 +252,7 @@ def needs_review(row):
 
 # read the game names from the txt file
 game_names = []
-with open(f'{directory_save}/game_names.csv', newline='', encoding='utf-8') as csvfile:
+with open('/Users/saiyingge/Coding Projects/PyCharmProjects/NetworkProject/Data/game_names.csv', newline='', encoding='utf-8') as csvfile:
     reader = csv.reader(csvfile)
     for row in reader:
         game_names.append(row[0])
@@ -347,7 +347,7 @@ for game_name in game_names:
 # show the labels of ag in the rows that need to be checked
 
 # Filter rows where 'matched_labels' or 'coder1_unique_labels' contain 'AG'
-filtered_rows = cross_checked[
-    cross_checked['matched_labels'].apply(lambda labels: any('CH' in label for label in labels if isinstance(labels, list))) |
-    cross_checked['coder2_unique_labels'].astype(str).str.contains('CH')
-]
+# filtered_rows = cross_checked[
+#     cross_checked['matched_labels'].apply(lambda labels: any('CH' in label for label in labels if isinstance(labels, list))) |
+#     cross_checked['coder2_unique_labels'].astype(str).str.contains('CH')
+# ]
