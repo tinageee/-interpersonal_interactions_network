@@ -39,11 +39,12 @@ import re
 
 
 # Directory containing the game files
-directory_Coder1 = '/Users/saiyingge/**Research Projects/Nomination-network/data/Tags_two_coders/XC_tags'
-directory_Coder2 = '/Users/saiyingge/**Research Projects/Nomination-network/data/Tags_two_coders/KG_tags'
+raw_data_dir #read from directoies record file
+directory_Coder1 = raw_data_dir +'Tags_two_coders/XC_tags'
+directory_Coder2 = raw_data_dir +'Tags_two_coders/KG_tags'
 
 # save directory
-directory_save = '/Users/saiyingge/Coding Projects/PyCharmProjects/NetworkProject/Data/Private_Data'
+directory_save = '/Data/Private_Data'
 
 # the file need to restructure
 file_restructure = ['003USP', '003ZAM', '007ISR', '010HK','003ISR', '008USP', '013HK']
@@ -252,7 +253,7 @@ def needs_review(row):
 
 # read the game names from the txt file
 game_names = []
-with open('/Users/saiyingge/Coding Projects/PyCharmProjects/NetworkProject/Data/game_names.csv', newline='', encoding='utf-8') as csvfile:
+with open('/Data/game_names.csv', newline='', encoding='utf-8') as csvfile:
     reader = csv.reader(csvfile)
     for row in reader:
         game_names.append(row[0])
