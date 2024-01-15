@@ -21,34 +21,16 @@ import pandas as pd
 import ast
 import re
 
-label_prefix_list= ['AG', 'DAG', 'TT', 'DTT', 'NM', 'SPY', 'CH', 'DF']
-# Get the current working directory
-code_dir='/Users/saiyingge/Coding Projects/PyCharmProjects/NetworkProject/'
-
-# Construct the full path to the file
-game_name_file_path = os.path.join(code_dir, 'Data/game_names.csv')
-Reviewed_files = os.path.join(code_dir, 'Data/Private_Data/Reviewed/')
-
-# Get all game names
-game_names = []
-with open(game_name_file_path, newline='', encoding='utf-8') as csvfile:
-    reader = csv.reader(csvfile)
-    for row in reader:
-        game_names.append(row[0])
-
-print(game_names)
-
-game_name= game_names[0]
-# find the corresponding files
-file_path = glob.glob(os.path.join(Reviewed_files, f'{game_name}.xlsx'))[0]
-
-# read the files
-raw_labels = pd.read_excel(file_path)
-
 def compare_label_sets(row):
+    """
+    This function extracts labels from 'matched_labels' and consolidated label columns.
     # Extract labels from the matched_labels and consolidated labels, put them into a set for each raw
     # checked if the label ends with a digit, if so, add it to the set
     # if the label is not in the acceptable list, print the row
+    :param row:     Each row of the raw_labels
+    :return:    The row with a set of labels
+    """
+
 
     # Initialize a set for labels
     combined_labels = set()
@@ -95,6 +77,31 @@ def compare_label_sets(row):
 
     # Return NaN if the set is empty, else return the set
     return combined_labels if combined_labels else pd.NA
+
+label_prefix_list= ['AG', 'DAG', 'TT', 'DTT', 'NM', 'SPY', 'CH', 'DF']
+# Get the current working directory
+code_dir='/Users/saiyingge/Coding Projects/PyCharmProjects/NetworkProject/'
+
+# Construct the full path to the file
+game_name_file_path = os.path.join(code_dir, 'Data/game_names.csv')
+Reviewed_files = os.path.join(code_dir, 'Data/Private_Data/Reviewed/')
+
+# Get all game names
+game_names = []
+with open(game_name_file_path, newline='', encoding='utf-8') as csvfile:
+    reader = csv.reader(csvfile)
+    for row in reader:
+        game_names.append(row[0])
+
+print(game_names)
+
+game_name= game_names[0]
+# find the corresponding files
+file_path = glob.glob(os.path.join(Reviewed_files, f'{game_name}.xlsx'))[0]
+
+# read the files
+raw_labels = pd.read_excel(file_path)
+
 
 # Apply the compare_label_sets function to each row
 raw_labels['combined_labels'] = raw_labels.apply(compare_label_sets, axis=1)

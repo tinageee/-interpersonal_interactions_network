@@ -39,11 +39,12 @@ import re
 
 
 # Directory containing the game files
-directory_Coder1 = '/Users/saiyingge/**Research Projects/Nomination-network/data/Tags_two_coders/XC_tags'
-directory_Coder2 = '/Users/saiyingge/**Research Projects/Nomination-network/data/Tags_two_coders/KG_tags'
+raw_data_dir #read from directoies record file
+directory_Coder1 = raw_data_dir +'Tags_two_coders/XC_tags'
+directory_Coder2 = raw_data_dir +'Tags_two_coders/KG_tags'
 
 # save directory
-directory_save = '/Users/saiyingge/Coding Projects/PyCharmProjects/NetworkProject/Data/'
+directory_save = '/Data/Private_Data'
 
 # the file need to restructure
 file_restructure = ['003USP', '003ZAM', '007ISR', '010HK','003ISR', '008USP', '013HK']
@@ -129,6 +130,11 @@ rows_with_unacceptable_prefixes = pd.DataFrame()
 
 # convert the label in L1_1 to L5_1 to same name write in function, using disctionary
 def convert_label(label):
+    """
+    Convert a label to a predefined set of acceptable tags.
+    :param label:   The label to convert
+    :return:    The converted label
+    """
     if not isinstance(label, str):
         return label  # Return the label as is if it's not a string
     #Trim whitespace
@@ -168,6 +174,11 @@ def convert_label(label):
 
 # Function to check if a label does not start with any of the acceptable prefixes
 def does_not_start_with_acceptable_prefix(label):
+    """
+    Check if a label does not start with any of the acceptable prefixes.
+    :param label:
+    :return:    True if the label does not start with any of the acceptable prefixes, else False
+    """
     if pd.isna(label):
         return False  # Exclude NaN values
     return not any(label.startswith(prefix) for prefix in acceptable_label_prefixes)
@@ -175,6 +186,11 @@ def does_not_start_with_acceptable_prefix(label):
 
 # Function to check if a label does not start with any of the interested prefixes
 def does_not_start_with_interested_prefix(label):
+    """
+    Check if a label does not start with any of the interested prefixes.
+    :param label:   The label to check
+    :return:    True if the label does not start with any of the interested prefixes, else False
+    """
     if pd.isna(label) or not isinstance(label, str):
         return False  # Exclude NaN and non-string values
     return any(label.startswith(prefix) for prefix in interested_label_prefixes)
@@ -182,6 +198,11 @@ def does_not_start_with_interested_prefix(label):
 
 # Function to check if a label starts with any of the interested prefixes
 def change_label_if_not_interested(label):
+    """
+    Change a label to NaN if it does not start with any of the interested prefixes.
+    :param label:  The label to check
+    :return:    The label if it starts with any of the interested prefixes, else NaN
+    """
     if pd.isna(label) or any(label.startswith(prefix) for prefix in interested_label_prefixes):
         return label  # Return the label as is if it's NaN or starts with an interested prefix
     return pd.NA  # Change label to NaN if it doesn't start with an interested prefix
@@ -189,6 +210,13 @@ def change_label_if_not_interested(label):
 
 # Function to compare labels as sets with additional condition
 def compare_label_sets(row, coder1_cols, coder2_cols):
+    """
+    Compare labels as sets with additional conditions.
+    :param row:     The row to compare
+    :param coder1_cols:     The columns containing coder 1's labels
+    :param coder2_cols:     The columns containing coder 2's labels
+    :return:    A tuple containing the matched labels, unique labels for coder 1, and unique labels for coder 2
+    """
     coder1_labels = set(row[coder1_cols].dropna())
     coder2_labels = set(row[coder2_cols].dropna())
 
@@ -232,7 +260,11 @@ def compare_label_sets(row, coder1_cols, coder2_cols):
 
 # Function to determine if a row needs review
 def needs_review(row):
-    # Check if either of unique labels for coders are non-empty
+    '''
+    Determine if a row needs review.
+    :param row:     The row to check
+    :return:    'Review' if the row needs review, else ''
+    '''
     # Check if either of unique labels for coders are non-empty
     if row['coder1_unique_labels'] or row['coder2_unique_labels']:
         return 'Review'
@@ -252,7 +284,7 @@ def needs_review(row):
 
 # read the game names from the txt file
 game_names = []
-with open(f'{directory_save}/game_names.csv', newline='', encoding='utf-8') as csvfile:
+with open('/Data/game_names.csv', newline='', encoding='utf-8') as csvfile:
     reader = csv.reader(csvfile)
     for row in reader:
         game_names.append(row[0])
@@ -344,10 +376,3 @@ for game_name in game_names:
     cross_checked.to_excel(f'{directory_save}/NeedReview/{game_name}.xlsx', index=False)
 
 
-# show the labels of ag in the rows that need to be checked
-
-# Filter rows where 'matched_labels' or 'coder1_unique_labels' contain 'AG'
-filtered_rows = cross_checked[
-    cross_checked['matched_labels'].apply(lambda labels: any('CH' in label for label in labels if isinstance(labels, list))) |
-    cross_checked['coder2_unique_labels'].astype(str).str.contains('CH')
-]
