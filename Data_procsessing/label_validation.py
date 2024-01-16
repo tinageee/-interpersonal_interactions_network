@@ -282,7 +282,7 @@ def needs_review(row):
     return ''
 
 
-# read the game names from the txt file
+# read the game names from the csv file
 game_names = []
 with open('/Data/game_names.csv', newline='', encoding='utf-8') as csvfile:
     reader = csv.reader(csvfile)
