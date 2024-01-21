@@ -61,6 +61,11 @@ player = player[player['game_name'].isin(game_info['game_name'])]
 # Merge player with game name information
 player = pd.merge(player, game_info, on='game_name')
 
+# add a column with game result, spy win is 1, resistance win is 0
+# if winlose is win and game_role is spy,or winlose is lose and game_role is villager,
+# then SpyWin,  else VillagerWin
+
+player['game_result'] = player.apply(lambda x: 'SpyWin' if (x['WinLose'] == 'Win' and x['Game_Role'] == 'Spy') or (x['WinLose'] == 'Lose' and x['Game_Role'] == 'Villager') else 'VillagerWin', axis=1)
 # Drop the row names equivalent in pandas
 player.reset_index(drop=True, inplace=True)
 
