@@ -77,7 +77,7 @@ all_links.to_csv(Code_dir + 'Data/all_links.csv', index=False)
 
 # find outliers
 # show the number of links in each games
-all_links.groupby('game').count()
+print(all_links.groupby('game').count())
 all_links.groupby('from').count()
 all_links.groupby('to').count()
 

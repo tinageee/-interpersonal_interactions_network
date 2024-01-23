@@ -207,3 +207,4 @@ processed_labels.to_csv(Reviewed_files + 'combined_labels_w_transcripts.csv', in
 # # error handling
 # check = processed_labels[(processed_labels['game'] == '007NTU') & (~processed_labels['raw_labels'].isna())]
 # check = processed_labels[(processed_labels['game'] == '008ISR') & (~processed_labels['raw_labels'].isna())]
+check = processed_labels[(processed_labels['game'] == '011AZ') & (~processed_labels['raw_labels'].isna())]
