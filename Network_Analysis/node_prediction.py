@@ -1,15 +1,10 @@
-from sklearn.model_selection import train_test_split, cross_val_score
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import classification_report
+
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import GradientBoostingClassifier
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
 from sklearn.model_selection import StratifiedKFold
+from sklearn.neural_network import MLPClassifier
+from sklearn.metrics import make_scorer, accuracy_score, precision_score, recall_score, f1_score
 from sklearn.preprocessing import LabelEncoder
-from sklearn.model_selection import GridSearchCV
-from keras.wrappers.scikit_learn import KerasClassifier
-
-
 
 import pandas as pd
 import numpy as np
@@ -136,7 +131,6 @@ def perform_custom_cross_validation(model, features, target):
     return results
 
 
-
 # read the nodes infomration from the csv file
 game_nodes = pd.read_csv(
     '/Users/saiyingge/Coding Projects/PyCharmProjects/NetworkProject/Data/all_nodes_W_rankings.csv')
@@ -177,11 +171,26 @@ evaluate_performance('pageRank', game_nodes['Game_Role'], game_nodes['pageRank_p
 game_nodes.loc[:, 'Spy'] = (game_nodes['Game_Role'] == 'Spy').astype(int)
 target = game_nodes['Game_Role']
 
+# Best parameters from grid search for MLPClassifier
+best_mlp_params = {
+    'activation': 'relu',
+    'alpha': 0.001,
+    'batch_size': 32,
+    'hidden_layer_sizes': (8,),
+    'learning_rate': 'constant',
+    'solver': 'adam',
+    'max_iter': 1000  # Adjust based on convergence behavior
+}
+
+# Initialize MLPClassifier with the best parameters
+mlp_classifier = MLPClassifier(**best_mlp_params)
+
 # List of models
 models = [
     {"name": "Logistic Regression", "model": LogisticRegression()},
-    {"name": "Gradient Boosting Machine", "model": GradientBoostingClassifier(n_estimators=100, learning_rate=0.05, max_depth =4, max_features=None, subsample=1.0,
-                                                                              random_state=42)}
+    {"name": "Gradient Boosting Machine", "model": GradientBoostingClassifier(n_estimators=150, learning_rate=0.05, max_depth =4, max_features=None, subsample=1.0,
+                                                                              random_state=42)},
+    {"name": "Neural Network", "model": mlp_classifier}
 ]
 
 # for node attributes only
@@ -200,6 +209,9 @@ for model_info in models:
     print(f"Results for {model_name}:")
     print(cv_results)
 
+
+
+
 # for node ranking sore and other player and game attributes
 
 features_set2 = game_nodes[['receivedTrust', 'prestige', 'hits','pageRank',
@@ -211,55 +223,6 @@ for model_info in models:
     print(f"Results for {model_name}:")
     print(cv_results)
 
-
-# find the optimal parameters for the gradient boosting machine
-
-# Define parameter grid
-# Create a dictionary of parameters to test
-param_grid = {
-    'n_estimators': [50, 100, 150],
-    'learning_rate': [0.01, 0.05, 0.1],
-    'max_depth': [2,3,4],
-    'subsample': [0.8, 0.9, 1.0],
-    'max_features': ['sqrt', 'log2', None, 4]
-}
-
-# Initialize the GBM model
-gbm = GradientBoostingClassifier(random_state=42)
-
-# Initialize GridSearchCV
-grid_search = GridSearchCV(estimator=gbm, param_grid=param_grid, cv=5, n_jobs=-1, verbose=2)
-
-# Fit GridSearchCV
-grid_search.fit(features_set2, target)
-
-# Best parameters
-print("Best parameters:", grid_search.best_params_)
-
-# feature set 1:
-# Best parameters: {'learning_rate': 0.01, 'max_depth': 3, 'max_features': None, 'n_estimators': 50, 'subsample': 1.0}
-# feature set 2:
-# Best parameters: {'learning_rate': 0.05, 'max_depth': 4, 'max_features': None, 'n_estimators': 150, 'subsample': 1.0}
+#todo: add plot
 
 
-
-def create_model(optimizer='adam'):
-    model = Sequential()
-    model.add(Dense(12, input_dim=8, activation='relu'))
-    model.add(Dense(1, activation='sigmoid'))
-    model.compile(loss='binary_crossentropy', optimizer=optimizer, metrics=['accuracy'])
-    return model
-
-model = KerasClassifier(build_fn=create_model, verbose=0)
-
-# define the grid search parameters
-optimizer = ['SGD', 'Adam', 'RMSprop']
-batch_size = [10, 20, 40]
-epochs = [10, 50, 100]
-
-param_grid = dict(optimizer=optimizer, batch_size=batch_size, epochs=epochs)
-grid = GridSearchCV(estimator=model, param_grid=param_grid, n_jobs=-1, cv=3)
-grid_result = grid.fit(X, Y)
-
-# summarize results
-print("Best: %f using %s" % (grid_result.best_score_, grid_result.best_params_))
