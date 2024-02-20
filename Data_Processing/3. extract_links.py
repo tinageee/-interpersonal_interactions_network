@@ -76,8 +76,22 @@ for index, row in raw_labels.iterrows():
 all_links.to_csv(Code_dir + 'Data/all_links.csv', index=False)
 
 # find outliers
-# show the number of links in each games
-print(all_links.groupby('game').count())
+# show the number of links in each game, sort by the number of links
+print(all_links.groupby('game').count() )
+# print(all_links.groupby('game').count().sort_values(by='from', ascending=False))
+
+# show the average number of links
+print(all_links.groupby('game').count().mean())
+
+#check the game name not in the game name list from a file
+# game_name_file_path = '/Users/saiyingge/**Research Projects/Nomination-network/data/Cleaned_2021/Game_process_track.xlsx'
+# old_game_names = pd.read_excel(game_name_file_path)['GameName'].tolist()
+# new_game_names = all_links['game'].unique().tolist()
+# for game in new_game_names:
+#     if game not in old_game_names:
+#         print(game)
+
+# print(all_links.groupby('game').count())
 all_links.groupby('from').count()
 all_links.groupby('to').count()
 

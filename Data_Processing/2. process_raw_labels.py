@@ -21,6 +21,7 @@ import pandas as pd
 import ast
 import re
 
+
 # def compare_label_sets(row):
 #     """
 #     This function extracts labels from 'matched_labels' and consolidated label columns.
@@ -125,7 +126,8 @@ def compare_label_sets(row, label_prefix_list, consolidated_cols=['L1', 'L2', 'L
         if isinstance(row[col], str) and row[col]:
             cleaned_labels = row[col].translate(str.maketrans('', '', '[]\''))
             labels = re.split('[,.]', cleaned_labels)
-            combined_labels.update(label.strip() for label in labels if label.strip() and ends_with_digit(label.strip()))
+            combined_labels.update(
+                label.strip() for label in labels if label.strip() and ends_with_digit(label.strip()))
 
     # Filter out labels starting with "Q"
     combined_labels = {label for label in combined_labels if not label.startswith('Q')}
@@ -138,10 +140,9 @@ def compare_label_sets(row, label_prefix_list, consolidated_cols=['L1', 'L2', 'L
     return combined_labels if combined_labels else pd.NA
 
 
-
-label_prefix_list= ['AG', 'DAG', 'TT', 'DTT', 'NM', 'SPY', 'CH', 'DF']
+label_prefix_list = ['AG', 'DAG', 'TT', 'DTT', 'NM', 'SPY', 'CH', 'DF']
 # Get the current working directory
-code_dir='/Users/saiyingge/Coding Projects/PyCharmProjects/NetworkProject/'
+code_dir = '/Users/saiyingge/Coding Projects/PyCharmProjects/NetworkProject/'
 
 # Construct the full path to the file
 game_name_file_path = os.path.join(code_dir, 'Data/game_names.csv')
@@ -160,11 +161,12 @@ with open(game_name_file_path, newline='', encoding='utf-8') as csvfile:
         game_names.append(row[0])
 
 print(game_names)
-# game_name = '012HK'
+
 
 # process each game
 for game_name in game_names:
     print(game_name)
+    # game_name = '003NTU'
     try:
         # find the corresponding files
         file_path = glob.glob(os.path.join(Reviewed_files, f'{game_name}.xlsx'))[0]
@@ -175,10 +177,12 @@ for game_name in game_names:
 
         # Apply the compare_label_sets function to each row
         try:
-            raw_labels['combined_labels'] = raw_labels.apply(compare_label_sets, axis=1, label_prefix_list=label_prefix_list)
+            raw_labels['combined_labels'] = raw_labels.apply(compare_label_sets, axis=1,
+                                                             label_prefix_list=label_prefix_list)
 
             # only keep the columns that are needed,first 4 columns and the combined labels
             raw_labels = raw_labels.iloc[:, :5].join(raw_labels['combined_labels'])
+            raw_labels.columns = ['indx', 'round', 'speaker', 'trans', 'game', 'raw_labels']
 
             # add the labels to the processed_labels,included the index
             processed_labels = pd.concat([processed_labels, raw_labels], ignore_index=False)
@@ -193,7 +197,7 @@ for game_name in game_names:
 
 print(f'Finished processing {countSuccess} files')
 
-#drop the last column, keep the first columns
+# drop the last column, keep the first columns
 processed_labels = processed_labels.iloc[:, :6]
 processed_labels.columns = ['indx', 'round', 'speaker', 'trans', 'game', 'raw_labels']
 
@@ -207,4 +211,4 @@ processed_labels.to_csv(Reviewed_files + 'combined_labels_w_transcripts.csv', in
 # # error handling
 # check = processed_labels[(processed_labels['game'] == '007NTU') & (~processed_labels['raw_labels'].isna())]
 # check = processed_labels[(processed_labels['game'] == '008ISR') & (~processed_labels['raw_labels'].isna())]
-check = processed_labels[(processed_labels['game'] == '011AZ') & (~processed_labels['raw_labels'].isna())]
+check = processed_labels[(processed_labels['game'] == '007ISR') & (~processed_labels['raw_labels'].isna())]
