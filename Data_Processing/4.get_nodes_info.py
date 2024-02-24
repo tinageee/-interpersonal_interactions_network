@@ -1,12 +1,12 @@
 import pandas as pd
 from sqlalchemy import create_engine
 
-
 # Directory path
 code_dir = '/Users/saiyingge/Coding Projects/PyCharmProjects/NetworkProject/'
 
 # List of homogeneous game names
-homo_game_names = ["001ISR", "002USP", "003HK", "003NTU", "005USP", "006AZ", "006NTU", "006USP", "006ZAM", "007HK", "007NTU", "009SB", "010NTU", "010UMD", "011NTU", "011SB", "012HK", "015ZAM"]
+homo_game_names = ["001ISR", "002USP", "003HK", "003NTU", "005USP", "006AZ", "006NTU", "006USP", "006ZAM", "007HK",
+                   "007NTU", "009SB", "010NTU", "010UMD", "011NTU", "011SB", "012HK", "015ZAM"]
 
 # Database connection details
 # read from other files
@@ -22,12 +22,12 @@ player_query = 'SELECT Player_ID, Player_Number, Game_Role, game_name, WinLose, 
 player = pd.read_sql(player_query, engine)
 
 # Merge DataFrames
-player = pd.merge(player,play_b4,  on='Player_ID',how='left')
+player = pd.merge(player, play_b4, on='Player_ID', how='left')
 
 # Add missing data
-missing_data = {'Player_ID':'na','play_b4':'', 'Player_Number': "3", 'Game_Role': "Villager", 'game_name': "002USP", 'WinLose': "Lose", 'sex': "Female", 'Eng_nativ': "not native speaker"}
+missing_data = {'Player_ID': 'na', 'play_b4': '', 'Player_Number': "3", 'Game_Role': "Villager", 'game_name': "002USP",
+                'WinLose': "Lose", 'sex': "Female", 'Eng_nativ': "not native speaker"}
 player = pd.concat([player, pd.DataFrame(missing_data, index=[0])], ignore_index=True)
-
 
 ##game info
 
@@ -37,7 +37,7 @@ game_info = pd.read_csv(code_dir + 'Data/game_names.csv', header=None)
 # Add homogeneous column based on game
 game_info['homogeneous'] = game_info[0].isin(homo_game_names).replace({True: 'Yes', False: 'No'})
 # rename the game_info column
-game_info.columns=['game_name','homogeneous']
+game_info.columns = ['game_name', 'homogeneous']
 
 # Query for round numbers
 round_number_query = 'SELECT gamename, predicted_round FROM app_team_rounds'
@@ -45,8 +45,8 @@ round_number = pd.read_sql(round_number_query, engine)
 
 # Group by and get max round
 round_number = round_number.groupby('gamename').agg(max_round=('predicted_round', 'max')).reset_index()
-#change gamename to game_name
-round_number.columns=['game_name','max_round']
+# change gamename to game_name
+round_number.columns = ['game_name', 'max_round']
 
 # Cleaning game names
 round_number['game_name'] = round_number['game_name'].str.upper().str.strip()
@@ -54,7 +54,7 @@ game_info['game_name'] = game_info['game_name'].str.upper().str.strip()
 player['game_name'] = player['game_name'].str.upper().str.strip()
 
 # combine game_info and round_number
-game_info=pd.merge(game_info,round_number, on='game_name',how='left')
+game_info = pd.merge(game_info, round_number, on='game_name', how='left')
 # Filter player DataFrame based on game names
 player = player[player['game_name'].isin(game_info['game_name'])]
 
@@ -65,20 +65,21 @@ player = pd.merge(player, game_info, on='game_name')
 # if winlose is win and game_role is spy,or winlose is lose and game_role is villager,
 # then SpyWin,  else VillagerWin
 
-player['game_result'] = player.apply(lambda x: 'SpyWin' if (x['WinLose'] == 'Win' and x['Game_Role'] == 'Spy') or (x['WinLose'] == 'Lose' and x['Game_Role'] == 'Villager') else 'VillagerWin', axis=1)
+player['game_result'] = player.apply(lambda x: 'SpyWin' if (x['WinLose'] == 'Win' and x['Game_Role'] == 'Spy') or (
+            x['WinLose'] == 'Lose' and x['Game_Role'] == 'Villager') else 'VillagerWin', axis=1)
 # Drop the row names equivalent in pandas
 player.reset_index(drop=True, inplace=True)
 
 # Write to CSV
-player.to_csv(code_dir+"Data/all_nodes.csv", index=False)
+player.to_csv(code_dir + "Data/all_nodes.csv", index=False)
 
 print("Data processing complete.")
 
 # run statistics for the player data
 # total number of players
-print("total number of players:",len(player))
+print("total number of players:", len(player))
 # total number of games
-print("total number of games:",len(player['game_name'].unique()))
+print("total number of games:", len(player['game_name'].unique()))
 # Convert Player_Number to numeric if it's not already
 player['Player_Number'] = pd.to_numeric(player['Player_Number'], errors='coerce')
 # Convert Player_Number to numeric if it's not already
@@ -107,19 +108,20 @@ player['max_round'].value_counts()
 # game roles counts
 player['Game_Role'].value_counts()
 
-#winlose counts
+# winlose counts
 player['WinLose'].value_counts()
 
-#sex counts
+# sex counts
 player['sex'].value_counts()
 
-#eng_nativ counts
+# eng_nativ counts
 player['Eng_nativ'].value_counts()
 
-#play_b4 counts
+# play_b4 counts
 player['play_b4'].value_counts()
 
-#homogeneous counts
+# homogeneous counts
 player['homogeneous'].value_counts()
 
 player.describe()
+# ethnic counts

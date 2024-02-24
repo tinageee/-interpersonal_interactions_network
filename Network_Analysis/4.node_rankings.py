@@ -156,23 +156,27 @@ game_nodes.loc[:, 'NativeEngSpeaker'] = (game_nodes['Eng_nativ'] == 'native spea
 game_nodes.loc[:, 'HomogeneousGroupCulture'] = (game_nodes['homogeneous'] == 'Yes').astype(int)
 game_nodes.loc[:, 'Male'] = (game_nodes['sex'] == 'Male').astype(int)
 
+# check the correlation between the independent variables
+print(game_nodes[['Spy', 'SpyWin', 'GameExperience', 'NativeEngSpeaker','Male']].corr())
+
+
 model_receivedTrust_fitted = smf.mixedlm(
-    "receivedTrust ~  Spy+ SpyWin+Male+GameExperience+NativeEngSpeaker+ HomogeneousGroupCulture",
+    "receivedTrust ~  Spy+ SpyWin+Male+Spy*SpyWin+GameExperience+NativeEngSpeaker",
     data=game_nodes,
     groups=game_nodes['game_name']).fit()
 
 model_prestige_fitted = smf.mixedlm(
-    "prestige ~ Spy+ SpyWin+Male+GameExperience+NativeEngSpeaker+ HomogeneousGroupCulture",
+    "prestige ~ Spy+ SpyWin+Male+Spy*SpyWin+GameExperience+NativeEngSpeaker",
     data=game_nodes,
     groups=game_nodes['game_name']).fit()
 
 model_hits_fitted = smf.mixedlm(
-    "hits ~ Spy+ SpyWin+Male+GameExperience+NativeEngSpeaker+ HomogeneousGroupCulture",
+    "hits ~ Spy+ SpyWin+Male+Spy*SpyWin+GameExperience+NativeEngSpeaker",
     data=game_nodes,
     groups=game_nodes['game_name']).fit()
 
 model_pageRank_fitted = smf.mixedlm(
-    "pageRank ~ Spy+ SpyWin+Male+GameExperience+NativeEngSpeaker+ HomogeneousGroupCulture",
+    "pageRank ~ Spy+ SpyWin+Male+Spy*SpyWin+GameExperience+NativeEngSpeaker",
     data=game_nodes,
     groups=game_nodes['game_name']).fit()
 
@@ -191,11 +195,9 @@ stargazer.custom_columns(["Received Trust", "Prestige", "HITS", "PageRank"],
 # change the variable name with stargazer table also, change the order of the variables
 stargazer.rename_covariates({'Group Var': 'Group Effect'})
 stargazer.covariate_order(
-    ['Spy', 'SpyWin', 'Male', 'NativeEngSpeaker', 'GameExperience', 'HomogeneousGroupCulture', 'Group Var',
+    ['Spy', 'SpyWin','Spy:SpyWin', 'Male', 'NativeEngSpeaker', 'GameExperience', 'Group Var',
      'Intercept'])
 
-stargazer.add_line("Hypothesis", ["H?", "H?", "H?", "H?"])
-stargazer.add_line("Support or Not", ["?", "?", "?", "?"])
 
 # print(stargazer.render_latex())
 

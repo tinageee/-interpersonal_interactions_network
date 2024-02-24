@@ -61,6 +61,7 @@ def categorize_and_update_row(row):
             # if the same sentiment to the same person is recorded multiple times, only keep one
             links = links.drop_duplicates()
 
+
     return links
 
 
@@ -77,7 +78,10 @@ all_links.to_csv(Code_dir + 'Data/all_links.csv', index=False)
 
 # find outliers
 # show the number of links in each game, sort by the number of links
+print(all_links['game'].unique())
 print(all_links.groupby('game').count() )
+#find nan in game
+# all_links[all_links['game'].isna()]
 # print(all_links.groupby('game').count().sort_values(by='from', ascending=False))
 
 # show the average number of links
@@ -97,3 +101,4 @@ all_links.groupby('to').count()
 
 # find the outlier
 # all_links[all_links['to'] == 24]
+#find nan in links

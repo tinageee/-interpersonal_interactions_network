@@ -106,6 +106,7 @@ def visualize_network(network, game_nodes, game):
     # plt.show()
     # Saving the plot
     plt.savefig(Code_dir + 'Data/Networks/Plots/' + game + '.png')
+    plt.close()
 
 
 # Directory path
@@ -115,10 +116,14 @@ Code_dir = '/Users/saiyingge/Coding Projects/PyCharmProjects/NetworkProject/'
 links = pd.read_csv(Code_dir + 'Data/all_links.csv')
 nodes = pd.read_csv(Code_dir + 'Data/all_nodes.csv')
 
+# find nan in links
+# links[links.isna().any(axis=1)]
+count=0
 # for each game, construct a network and create a plot. save the network and plot
 for game in links['game'].unique():
+    print(f'Processing {game}.graphml')
     # filter the links and nodes for each game
-    #  game='007NTU'
+    #  game='015AZ'
     game_links = links[links['game'] == game]
     game_nodes = nodes[nodes['game_name'] == game]
 
@@ -147,7 +152,9 @@ for game in links['game'].unique():
 
     # visualize the network
     visualize_network(network, game_nodes, game)
+    count+=1
 
+print(f'Finished processing {count} files')
 # error handling
 # Node 0 at 007NTU does not have a 'role' attribute.
 # Node 24 at 008ISR does not have a 'role' attribute.
