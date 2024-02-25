@@ -1,3 +1,10 @@
+'''
+calculte the connection score for each game/network
+adjust the connection score by the number of players
+pair-wise comparison
+visualize the connection scores
+'''
+
 import networkx as nx
 import numpy as np
 import pandas as pd
@@ -339,3 +346,8 @@ plt.show()
 
 #save plot
 plt.savefig(Code_dir + 'Data/Analysis_Results/' + 'Connection_Score.png')
+
+#save the game_info to a csv file
+# game_info.to_csv(Code_dir + 'Data/Analysis_Results/' + 'Connection_Score.csv', index=False)
+
+
