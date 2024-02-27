@@ -266,7 +266,7 @@ stargazer.covariate_order(
 
 stargazer.add_line("Hypothesis", ["H3a", "H3b", "H3c", "H3d"])
 stargazer.add_line("Support or Not", ["?", "?", "?", "?"])
-
+# todo: need to change the columns name add the hypothesis and support or not
 
 html = stargazer.render_html()
 with open(Code_dir + "Data/Analysis_Results/degree_analysis_results_outdegree.html", "w") as f: f.write(html)

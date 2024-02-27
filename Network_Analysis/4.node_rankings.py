@@ -5,7 +5,7 @@ The ranking scores include:
     2. prestige_scores
     3. hits_scores
     4. pageRank
-
+all the scores are normalized
 '''
 
 import networkx as nx
@@ -26,8 +26,9 @@ def calculate_receivedTrust(network):
     for node in network.nodes():
         pos_in_degree[node] = sum(1 for _, _, data in network.in_edges(node, data=True) if data['sign'] > 0)
 
-    # normalize the received trust
-    receivedTrust = {k: v / sum(pos_in_degree.values()) for k, v in pos_in_degree.items()}
+    # normalize the received trust, using min-max normalization
+    receivedTrust = {k: (v - min(pos_in_degree.values())) / (max(pos_in_degree.values()) - min(pos_in_degree.values()))
+                        for k, v in pos_in_degree.items()}
 
     return receivedTrust
 
@@ -46,6 +47,10 @@ def calculate_prestige(G):
             prestige_scores[node] = (trust_links - distrust_links) / (trust_links + distrust_links)
         else:
             prestige_scores[node] = 0
+
+    # normalize the prestige scores, using min-max normalization
+    prestige_scores = {k: (v - min(prestige_scores.values())) / (max(prestige_scores.values()) - min(prestige_scores.values()))
+                       for k, v in prestige_scores.items()}
 
     return prestige_scores
 
@@ -70,6 +75,10 @@ def calculate_HITS(G):
         negative_score = authority_scores_negative.get(node, 0)
         authority_scores[node] = positive_score - negative_score
 
+    # normalize the authority scores, using min-max normalization
+    authority_scores = {k: (v - min(authority_scores.values())) / (max(authority_scores.values()) - min(authority_scores.values()))
+                        for k, v in authority_scores.items()}
+
     return authority_scores
 
 
@@ -91,6 +100,11 @@ def calculate_signed_pageRank(G):
     pageRank_diff = {node: pageRank_positive.get(node, 0) - pageRank_negative.get(node, 0)
                      for node in G.nodes()}
 
+    # normalize the pageRank scores, using min-max normalization
+    pageRank_diff = {k: (v - min(pageRank_diff.values())) / (max(pageRank_diff.values()) - min(pageRank_diff.values()))
+                     for k, v in pageRank_diff.items()}
+
+
     return pageRank_diff
 
 
@@ -108,7 +122,7 @@ successful_games = 0
 
 # read the networks by game and calculate the degrees
 for game in games:
-    # game = '001ISR'
+    # game = '009AZ'
 
     try:
         network = nx.read_graphml(Code_dir + 'Data/Networks/' + game + '.graphml')
@@ -136,7 +150,7 @@ print(f'Finished processing {successful_games} files')
 # save the game_nodes
 game_nodes.to_csv(Code_dir + 'Data/all_nodes_W_rankings.csv', index=False)
 
-# TODO: check the na's
+
 # rows with missing values
 game_nodes[game_nodes.isnull().any(axis=1)]
 # percentage of missing values
@@ -148,38 +162,37 @@ game_nodes = game_nodes.dropna()
 print(game_nodes[['receivedTrust', 'prestige', 'hits', 'pageRank']].corr())
 
 # run regression with ranking scores as dependent variables and other attributes as independent variables
-game_nodes.loc[:, 'Spy'] = (game_nodes['Game_Role'] == 'Spy').astype(int)
-game_nodes.loc[:, 'SpyWin'] = (game_nodes['game_result'] == 'SpyWin').astype(int)
+game_nodes['Spy'] = (game_nodes['Game_Role'] == 'Spy').astype(int)
+game_nodes['SpyWin'] = (game_nodes['game_result'] == 'SpyWin').astype(int)
 
-game_nodes.loc[:, 'GameExperience'] = (game_nodes['play_b4'] == 'yes').astype(int)
-game_nodes.loc[:, 'NativeEngSpeaker'] = (game_nodes['Eng_nativ'] == 'native speaker').astype(int)
-game_nodes.loc[:, 'HomogeneousGroupCulture'] = (game_nodes['homogeneous'] == 'Yes').astype(int)
-game_nodes.loc[:, 'Male'] = (game_nodes['sex'] == 'Male').astype(int)
+game_nodes['GameExperience'] = (game_nodes['play_b4'] == 'yes').astype(int)
+game_nodes['NativeEngSpeaker'] = (game_nodes['Eng_nativ'] == 'native speaker').astype(int)
+# game_nodes['HomogeneousGroupCulture'] = (game_nodes['homogeneous'] == 'Yes').astype(int)
+game_nodes['Male'] = (game_nodes['sex'] == 'Male').astype(int)
 
 # check the correlation between the independent variables
-print(game_nodes[['Spy', 'SpyWin', 'GameExperience', 'NativeEngSpeaker','Male']].corr())
+print(game_nodes[['Spy', 'SpyWin', 'GameExperience', 'NativeEngSpeaker', 'Male']].corr())
 
-
-model_receivedTrust_fitted = smf.mixedlm(
+model_receivedTrust_fitted = smf.glm(
     "receivedTrust ~  Spy+ SpyWin+Male+Spy*SpyWin+GameExperience+NativeEngSpeaker",
-    data=game_nodes,
-    groups=game_nodes['game_name']).fit()
+    data=game_nodes).fit()
 
-model_prestige_fitted = smf.mixedlm(
+
+model_prestige_fitted = smf.glm(
     "prestige ~ Spy+ SpyWin+Male+Spy*SpyWin+GameExperience+NativeEngSpeaker",
-    data=game_nodes,
-    groups=game_nodes['game_name']).fit()
+    data=game_nodes).fit()
 
-model_hits_fitted = smf.mixedlm(
+model_hits_fitted = smf.glm(
     "hits ~ Spy+ SpyWin+Male+Spy*SpyWin+GameExperience+NativeEngSpeaker",
-    data=game_nodes,
-    groups=game_nodes['game_name']).fit()
+    data=game_nodes).fit()
 
-model_pageRank_fitted = smf.mixedlm(
+model_pageRank_fitted = smf.glm(
     "pageRank ~ Spy+ SpyWin+Male+Spy*SpyWin+GameExperience+NativeEngSpeaker",
-    data=game_nodes,
-    groups=game_nodes['game_name']).fit()
+    data=game_nodes).fit()
 
+
+
+game_nodes['game_name'].unique()
 # Create a list of fitted models
 fitted_models = [model_receivedTrust_fitted, model_prestige_fitted, model_hits_fitted, model_pageRank_fitted]
 
@@ -193,15 +206,13 @@ stargazer.custom_columns(["Received Trust", "Prestige", "HITS", "PageRank"],
                          [1, 1, 1, 1])
 
 # change the variable name with stargazer table also, change the order of the variables
-stargazer.rename_covariates({'Group Var': 'Group Effect'})
 stargazer.covariate_order(
-    ['Spy', 'SpyWin','Spy:SpyWin', 'Male', 'NativeEngSpeaker', 'GameExperience', 'Group Var',
+    ['Spy', 'SpyWin', 'Spy:SpyWin', 'Male', 'NativeEngSpeaker', 'GameExperience',
      'Intercept'])
-
 
 # print(stargazer.render_latex())
 
 html = stargazer.render_html()
 with open(Code_dir + "Data/Analysis_Results/Ranking_analysis_results.html", "w") as f: f.write(html)
 
-#todo: check the results
+# todo: check the results
