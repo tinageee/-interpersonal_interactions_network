@@ -55,14 +55,7 @@ Code_dir = '/Users/saiyingge/Coding Projects/PyCharmProjects/NetworkProject/'
 
 # get the player(nodes) information
 game_nodes = pd.read_csv(Code_dir + 'Data/all_nodes.csv')
-
-# get game info, including the game name, the number of players, and the number of rounds
-# aggregate the game info by game name, include game result
-game_info = game_nodes.groupby('game_name').agg(
-    {'max_round': 'max', 'Player_Number': 'count', 'game_result': 'first'}).reset_index()
-# include count the number of spy and villager in each game
-game_info = game_info.merge(game_nodes.groupby(['game_name', 'Game_Role']).size().unstack().reset_index(),
-                            on='game_name')
+game_info = pd.read_csv(Code_dir + 'Data/' + 'game_info.csv')
 
 # get game names
 games = game_info['game_name'].unique()
@@ -96,15 +89,15 @@ for game in games:
 print(f'Finished processing {count} files')
 
 # divide the connection scores by the number of players
-game_info['TT_Trust'] = game_info['TT_Trust'] / game_info['Villager']
-game_info['DD_Trust'] = game_info['DD_Trust'] / game_info['Spy']
-game_info['DT_Trust'] = game_info['DT_Trust'] / game_info['Villager']
-game_info['TD_Trust'] = game_info['TD_Trust'] / game_info['Spy']
+game_info['TT_Trust'] = game_info['TT_Trust'] / game_info['Num0fVillager']
+game_info['DD_Trust'] = game_info['DD_Trust'] / game_info['Num0fSpy']
+game_info['DT_Trust'] = game_info['DT_Trust'] / game_info['Num0fVillager']
+game_info['TD_Trust'] = game_info['TD_Trust'] / game_info['Num0fSpy']
 
-game_info['TT_Distrust'] = game_info['TT_Distrust'] / game_info['Villager']
-game_info['DD_Distrust'] = game_info['DD_Distrust'] / game_info['Spy']
-game_info['DT_Distrust'] = game_info['DT_Distrust'] / game_info['Villager']
-game_info['TD_Distrust'] = game_info['TD_Distrust'] / game_info['Spy']
+game_info['TT_Distrust'] = game_info['TT_Distrust'] / game_info['Num0fVillager']
+game_info['DD_Distrust'] = game_info['DD_Distrust'] / game_info['Num0fSpy']
+game_info['DT_Distrust'] = game_info['DT_Distrust'] / game_info['Num0fVillager']
+game_info['TD_Distrust'] = game_info['TD_Distrust'] / game_info['Num0fSpy']
 
 # adjust by the round number
 game_info['TT_Trust_adj'] = game_info['TT_Trust'] / game_info['max_round']
@@ -165,7 +158,7 @@ df_melted_Distrust = pd.melt(game_info, value_vars=['DD_Distrust', 'DT_Distrust'
 palette1 = {'DD_Trust': 'cyan', 'DT_Trust': 'magenta', 'TT_Trust': 'yellow'}
 palette2 = {'DD_Distrust': 'cyan', 'DT_Distrust': 'magenta', 'TT_Distrust': 'yellow'}
 
-labels = ['Deceiver In-group', 'Deceiver Out-group', 'TT In-group']  # Define your custom labels
+labels = ['Deceiver Intra-group', 'Deceiver Inter-group', 'TT Intra-group']  # Define your custom labels
 
 # ## box plot
 # # Setting up the matplotlib subplot environment
@@ -288,8 +281,8 @@ for i, mean in enumerate(means):
 tick_len = 0.25
 axes[0].plot([1, 1, 2, 2], [6.5 - tick_len, 6.5, 6.5, 6.5 - tick_len], c="black")
 axes[0].plot([1, 1, 3, 3], [8 - tick_len, 8, 8, 8 - tick_len], c="black")
-axes[0].text(1.5, 6.5 + 0.02, f"$p_{{ In group v.s. Out group}}$ = {P_DD_Trust}", fontsize=11, va="bottom", ha="center")
-axes[0].text(2, 8 + 0.02, f"$p_{{ TT v.s. DD}}$ = {P_in_group_Trust}", fontsize=11, va="bottom",
+axes[0].text(1.5, 6.5 + 0.02, f"$p_{{diff}}$ = {P_DD_Trust}", fontsize=11, va="bottom", ha="center")
+axes[0].text(2, 8 + 0.02, f"$p_{{diff}}$ = {P_in_group_Trust}", fontsize=11, va="bottom",
              ha="center")
 
 axes[0].set_xticks(positions[:len(labels)])
@@ -329,9 +322,9 @@ for i, mean in enumerate(means):
 tick_len = 0.25
 axes[1].plot([1, 1, 2, 2], [6.5 - tick_len, 6.5, 6.5, 6.5 - tick_len], c="black")
 axes[1].plot([1, 1, 3, 3], [8 - tick_len, 8, 8, 8 - tick_len], c="black")
-axes[1].text(1.5, 6.5 + 0.02, f"$p_{{ In group v.s. Out group}}$ = {P_DD_Distrust}", fontsize=11, va="bottom",
+axes[1].text(1.5, 6.5 + 0.02, f"$p_{{diff}}$ = {P_DD_Distrust}", fontsize=11, va="bottom",
              ha="center")
-axes[1].text(2, 8 + 0.02, f"$p_{{ TT v.s. DD}}$ = {P_in_group_Distrust}", fontsize=11, va="bottom",
+axes[1].text(2, 8 + 0.02, f"$p_{{diff}}$ = {P_in_group_Distrust}", fontsize=11, va="bottom",
              ha="center")
 
 axes[1].set_xticks(positions[:len(labels)])
@@ -348,6 +341,108 @@ plt.show()
 plt.savefig(Code_dir + 'Data/Analysis_Results/' + 'Connection_Score.png')
 
 #save the game_info to a csv file
-# game_info.to_csv(Code_dir + 'Data/Analysis_Results/' + 'Connection_Score.csv', index=False)
+game_info.to_csv(Code_dir + 'Data/Analysis_Results/' + 'Connection_Score.csv', index=False)
 
 
+# game data statistics
+# total number of games
+print("total number of games:", len(game_info['game_name'].unique()))
+# max round mean, min and max, std
+print("Mean max round:", game_info['max_round'].mean())
+print("Min max round:", game_info['max_round'].min())
+print("Max max round:", game_info['max_round'].max())
+print("Std max round:", game_info['max_round'].std())
+
+# game result counts
+game_info['game_result'].value_counts()
+
+game_info['player_number'] = game_info['Num0fVillager'] + game_info['Num0fSpy']
+
+# players
+print("Mean number of players in each game:", game_info['player_number'].mean())
+print("Min number of players in each game:", game_info['player_number'].min())
+print("Max number of players in each game:", game_info['player_number'].max())
+print("Std number of players in each game:", game_info['player_number'].std())
+
+# plot seperately
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Assuming 'df_melted_Trust', 'df_melted_Distrust', and 'game_info' are defined
+# Customization properties
+medianprops = dict(linewidth=2, solid_capstyle="butt")
+boxprops = dict(linewidth=2, color='black')
+positions = [1, 2, 3]
+colors_group = ['red', 'blue', 'green']  # Colors for jittered dots
+RED_DARK = '#d62728'
+
+def jittered_scatter(data, ax, color, jitter_strength=0.05, **scatter_kwargs):
+    jitter = np.random.uniform(-jitter_strength, jitter_strength, size=len(data))
+    ax.scatter(jitter + scatter_kwargs.pop('x_pos', 1), data, color=color, **scatter_kwargs)
+
+# Trust Connections Plot
+fig, ax = plt.subplots(figsize=(7, 6))
+trust_types = df_melted_Trust['Trust Type'].unique()
+for i, trust_type in enumerate(trust_types, start=1):
+    data = df_melted_Trust[df_melted_Trust['Trust Type'] == trust_type]['Score']
+    color = colors_group[i - 1]
+    parts = ax.violinplot(data, positions=[i], widths=0.5, showmeans=False, showmedians=False, showextrema=False)
+    for pc in parts['bodies']:
+        pc.set_facecolor('none')
+        pc.set_edgecolor('grey')
+        pc.set_alpha(1)
+    ax.boxplot(data, positions=[i], widths=0.2, medianprops=medianprops, boxprops=boxprops, whiskerprops=boxprops,
+               showcaps=False, showfliers=False)
+    jittered_scatter(data, ax, color=color, x_pos=i, alpha=0.4, edgecolor='grey', linewidth=0.5, s=20)
+
+# Add mean value labels for Trust
+y_data = [game_info[column] for column in ['DD_Trust', 'DT_Trust', 'TT_Trust']]
+means = [np.mean(y) for y in y_data]
+for i, mean in enumerate(means):
+    ax.scatter(positions[i], mean, s=100, color=RED_DARK, zorder=3)
+    ax.plot([positions[i], positions[i] + 0.25], [mean, mean], ls="dashdot", color="black", zorder=3)
+    ax.text(positions[i] + 0.25, mean, f"$\hat{{\mu}}_{{mean}} = {round(mean, 2)}$", fontsize=13, va="center",
+            bbox=dict(facecolor="white", edgecolor="black", boxstyle="round", pad=0.15), zorder=10)
+
+# Customize Trust plot
+ax.set_xticks(positions[:len(trust_types)])
+ax.set_xticklabels(trust_types)
+ax.set_title('Trust Connections')
+ax.set_ylabel('Connection Score (adjusted by # of objects)')
+plt.tight_layout()
+plt.show()
+
+
+
+# Distrust Connections Plot
+fig, ax = plt.subplots(figsize=(7, 6))
+distrust_types = df_melted_Distrust['Distrust Type'].unique()
+for i, distrust_type in enumerate(distrust_types, start=1):
+    data = df_melted_Distrust[df_melted_Distrust['Distrust Type'] == distrust_type]['Score']
+    color = colors_group[i - 1]
+    parts = ax.violinplot(data, positions=[i], widths=0.5, showmeans=False, showmedians=False, showextrema=False)
+    for pc in parts['bodies']:
+        pc.set_facecolor('none')
+        pc.set_edgecolor('grey')
+        pc.set_alpha(1)
+    ax.boxplot(data, positions=[i], widths=0.2, medianprops=medianprops, boxprops=boxprops, whiskerprops=boxprops,
+               showcaps=False, showfliers=False)
+    jittered_scatter(data, ax, color=color, x_pos=i, alpha=0.4, edgecolor='grey', linewidth=0.5, s=20)
+
+# Add mean value labels for Distrust
+y_data = [game_info[column] for column in ['DD_Distrust', 'DT_Distrust', 'TT_Distrust']]
+means = [np.mean(y) for y in y_data]
+for i, mean in enumerate(means):
+    ax.scatter(positions[i], mean, s=100, color=RED_DARK, zorder=3)
+    ax.plot([positions[i], positions[i] + 0.25], [mean, mean], ls="dashdot", color="black", zorder=3)
+    ax.text(positions[i] + 0.25, mean, f"$\hat{{\mu}}_{{mean}} = {round(mean, 2)}$", fontsize=13, va="center",
+            bbox=dict(facecolor="white", edgecolor="black", boxstyle="round", pad=0.15), zorder=10)
+
+# Customize Distrust plot
+ax.set_xticks(positions[:len(distrust_types)])
+ax.set_xticklabels(distrust_types)
+ax.set_title('Distrust Connections')
+ax.set_ylabel('Connection Score (adjusted by # of objects)')
+plt.tight_layout()
+plt.show()

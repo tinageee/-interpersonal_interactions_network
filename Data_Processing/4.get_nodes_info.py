@@ -48,6 +48,8 @@ round_number = round_number.groupby('gamename').agg(max_round=('predicted_round'
 # change gamename to game_name
 round_number.columns = ['game_name', 'max_round']
 
+
+
 # Cleaning game names
 round_number['game_name'] = round_number['game_name'].str.upper().str.strip()
 game_info['game_name'] = game_info['game_name'].str.upper().str.strip()
